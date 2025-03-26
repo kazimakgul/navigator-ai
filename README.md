@@ -53,7 +53,7 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/navigator-ai.git
+   git clone https://github.com/SohamRatnaparkhi/navigator-ai.git
    cd navigator-ai
    ```
 

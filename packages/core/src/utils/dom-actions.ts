@@ -52,26 +52,18 @@ export class DomActions {
     }
 
     public async simulateHumanInput(element: HTMLInputElement, text: string, shouldPressEnter = true): Promise<void> {
-        // Focus the input element first
         element.focus();
-
-        // Clear existing value if any
         element.value = '';
 
-        // Type characters with human-like delays
         for (let i = 0; i < text.length; i++) {
             const char = text.charAt(i);
 
-            // Add character to input
             element.value += char;
 
-            // Create and dispatch input event
             element.dispatchEvent(new Event('input', { bubbles: true }));
 
-            // Generate keydown and keyup events with the correct key code
             const keyCode = char.charCodeAt(0);
 
-            // KeyDown event
             element.dispatchEvent(new KeyboardEvent('keydown', {
                 key: char,
                 code: `Key${char.toUpperCase()}`,
@@ -81,7 +73,6 @@ export class DomActions {
                 cancelable: true
             }));
 
-            // KeyPress event
             element.dispatchEvent(new KeyboardEvent('keypress', {
                 key: char,
                 code: `Key${char.toUpperCase()}`,
@@ -91,7 +82,6 @@ export class DomActions {
                 cancelable: true
             }));
 
-            // KeyUp event
             element.dispatchEvent(new KeyboardEvent('keyup', {
                 key: char,
                 code: `Key${char.toUpperCase()}`,
@@ -101,30 +91,24 @@ export class DomActions {
                 cancelable: true
             }));
 
-            // Random typing speed delay between 30-100ms
             const typingDelay = Math.floor(Math.random() * 70) + 30;
             await new Promise(resolve => setTimeout(resolve, typingDelay));
 
-            // Occasionally add a longer pause (1 in 8 chance)
             if (Math.random() < 0.125 && i < text.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 150 + Math.random() * 200));
             }
         }
 
-        // Trigger change event after completion
         element.dispatchEvent(new Event('change', { bubbles: true }));
 
-        // If requested, simulate pressing Enter key
         if (shouldPressEnter) {
             await this.simulateEnterKey(element);
         }
 
-        // Small delay after typing completes
         await new Promise(resolve => setTimeout(resolve, 300));
     }
 
     public async simulateEnterKey(element: Element): Promise<void> {
-        // KeyDown event for Enter
         element.dispatchEvent(new KeyboardEvent('keydown', {
             key: 'Enter',
             code: 'Enter',
@@ -134,7 +118,6 @@ export class DomActions {
             cancelable: true
         }));
 
-        // KeyPress event for Enter
         element.dispatchEvent(new KeyboardEvent('keypress', {
             key: 'Enter',
             code: 'Enter',
@@ -144,7 +127,6 @@ export class DomActions {
             cancelable: true
         }));
 
-        // Determine if this should trigger a form submission
         let formToSubmit: HTMLFormElement | null = null;
         if (element instanceof HTMLInputElement && element.form) {
             formToSubmit = element.form;
@@ -152,11 +134,9 @@ export class DomActions {
             formToSubmit = element.closest('form') as HTMLFormElement;
         }
 
-        // If inside a form, try to submit it
         if (formToSubmit) {
             formToSubmit.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 
-            // If form has submit button, click it
             const submitButton = formToSubmit.querySelector('input[type="submit"], button[type="submit"]');
             if (submitButton) {
                 submitButton.dispatchEvent(new MouseEvent('click', {
@@ -167,7 +147,6 @@ export class DomActions {
             }
         }
 
-        // KeyUp event for Enter
         element.dispatchEvent(new KeyboardEvent('keyup', {
             key: 'Enter',
             code: 'Enter',
@@ -177,7 +156,35 @@ export class DomActions {
             cancelable: true
         }));
 
-        // Small delay after pressing Enter
         await new Promise(resolve => setTimeout(resolve, 200));
     }
-} 
+
+    public async copyElementToClipboard(element: Element): Promise<void> {
+        try {
+            // copy element html to clipboard
+            const html = element.outerHTML;
+            await navigator.clipboard.writeText(html);
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+        }
+    }
+
+    public async switchToTab(tabId: number): Promise<void> {
+        try {
+            // Send a message to the background script to switch tabs
+            // @ts-ignore
+            chrome.runtime.sendMessage({
+                type: 'switchTab',
+                tabId: tabId
+            }, (response) => {
+                if (response && response.success) {
+                    console.log(`Successfully switched to tab ${tabId}`);
+                } else {
+                    console.error('Failed to switch tab:', response?.error || 'Unknown error');
+                }
+            });
+        } catch (error) {
+            console.error('Failed to switch to tab:', error);
+        }
+    }
+}

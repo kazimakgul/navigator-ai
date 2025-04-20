@@ -3,7 +3,7 @@
 
 import { Message } from '../types';
 import { createSidebarContainer, toggleSidebar, updateSidebarState, isChromeSidePanelSupported } from '../sidebar';
-import { processDOM, sequentialDOMProcessing, singleDOMProcessIteration } from '../dom/processor';
+import { singleDOMProcessIteration } from '../dom/processor';
 import { clearAllHighlights } from '../highlight';
 import { handleAutomationActions } from '../automation';
 
@@ -56,44 +56,44 @@ export function initializeMessageListener(): void {
             return true; // Keep channel open for async response
         }
 
-        if (message.type === 'processDOM' && message.task_id) {
-            // Only create the custom container for non-Chrome browsers
-            if (!isChromeWithSidePanel) {
-                createSidebarContainer();
-            }
+        // if (message.type === 'processDOM' && message.task_id) {
+        //     // Only create the custom container for non-Chrome browsers
+        //     if (!isChromeWithSidePanel) {
+        //         createSidebarContainer();
+        //     }
             
-            processDOM(message.task_id)
-                .then((domData) => {
-                    sendResponse({ success: true, domData });
-                })
-                .catch(error => {
-                    console.error('Error in processDOM:', error);
-                    sendResponse({ 
-                        success: false, 
-                        error: error instanceof Error ? error.message : String(error)
-                    });
-                });
-            return true; 
-        }
-        else if (message.type === 'startSequentialProcessing' && message.task_id) {
-            // Only create the custom container for non-Chrome browsers
-            if (!isChromeWithSidePanel) {
-                createSidebarContainer();
-            }
+        //     processDOM(message.task_id)
+        //         .then((domData) => {
+        //             sendResponse({ success: true, domData });
+        //         })
+        //         .catch(error => {
+        //             console.error('Error in processDOM:', error);
+        //             sendResponse({ 
+        //                 success: false, 
+        //                 error: error instanceof Error ? error.message : String(error)
+        //             });
+        //         });
+        //     return true; 
+        // }
+        // else if (message.type === 'startSequentialProcessing' && message.task_id) {
+        //     // Only create the custom container for non-Chrome browsers
+        //     if (!isChromeWithSidePanel) {
+        //         createSidebarContainer();
+        //     }
             
-            sequentialDOMProcessing(message.task_id, message.maxIterations || 10)
-                .then((result) => {
-                    sendResponse({ success: true, result });
-                })
-                .catch(error => {
-                    console.error('Error in sequential processing:', error);
-                    sendResponse({ 
-                        success: false, 
-                        error: error instanceof Error ? error.message : String(error)
-                    });
-                });
-            return true; // Keep channel open for async response
-        }
+        //     sequentialDOMProcessing(message.task_id, message.maxIterations || 10)
+        //         .then((result) => {
+        //             sendResponse({ success: true, result });
+        //         })
+        //         .catch(error => {
+        //             console.error('Error in sequential processing:', error);
+        //             sendResponse({ 
+        //                 success: false, 
+        //                 error: error instanceof Error ? error.message : String(error)
+        //             });
+        //         });
+        //     return true; // Keep channel open for async response
+        // }
         else if (message.type === 'toggleUI' || message.type === 'toggleSidebar') {
             // Use Chrome's sidePanel API if available, otherwise fall back to custom sidebar
             if (isChromeWithSidePanel) {

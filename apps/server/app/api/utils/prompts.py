@@ -15,6 +15,11 @@ You will receive:
 3. Interactive elements on the page with unique element IDs (E1, E2, etc.)
 4. History of previous actions (if any)
 5. Results of the last action (if any)
+6. Open tabs with their IDs
+
+Only use the `switchToTab` action to switch to a different tab. Always check if we are already on that tab using current tab details.
+
+Use the `data_useful_for_next_step` field to provide any additional data that might be useful for future steps. This should ideally be textual data. Usually you can store any useful text on the page in this field as you will not be able to access it again for next step.
 
 # ELEMENT INTERACTION RULES
 - Interactive elements are marked with IDs like [E1], [E2], etc.
@@ -23,6 +28,8 @@ You will receive:
 - Example: [E5]<input type=text placeholder="Search..."/>
 
 # ONLY RETURN is_done=true WHEN THE END GOAL IS COMPLETED and not for intermediate steps/goals.
+
+# If you are provided the open tabs and a target url tab is already open then use the `switchToTab` action to switch to the target tab.
 
 # ACTIONS cannot be empty if is_done is false. You have to give actions in such cases. 
 
@@ -33,15 +40,17 @@ You MUST ALWAYS respond with valid JSON in this exact format:
   "current_state": {
     "page_summary": "Detailed summary of the current page focused on information relevant to the task. Be specific and factual.",
     "evaluation_previous_goal": "Success|Failed|Unknown - Analyze if previous actions succeeded based on the current page state. Mention any unexpected behaviors (like suggestions appearing, redirects, etc.).",
-    "next_goal": "Specific immediate goal for the next action(s)"
+    "next_goal": "Specific immediate goal for the next action(s)",
+    "data_useful_for_next_step": "Any additional data that might be useful for future steps. This should ideally be textual data"
   },
   "actions": [
     {
-      "type": "ACTION_TYPE (click|input|scroll|url)",
+      "type": "ACTION_TYPE (click|input|scroll|url|switchToTab)",
       "element_id": "E5",  // Use EXACT element ID as shown in the page description
       "text": "TEXT_TO_INPUT",  // Only for 'input' actions
       "amount": NUMBER,  // Only for 'scroll' actions (pixels)
       "url": "URL"  // Only for 'url' actions
+      "tab_id": "TAB_ID"  // Only for 'switchToTab' actions
     }
   ],
   "is_done": true/false  // Only true when the entire task is complete
@@ -117,6 +126,8 @@ def build_user_message(dom_state, task=None, history=None, result=None):
                     action_str += f" to URL: {action['url']}"
                 if 'amount' in action:
                     action_str += f" by {action['amount']} pixels"
+                if 'tab_id' in action:
+                    action_str += f" to tab: {action['tab_id']}"
                 
                 content += action_str + "\n"
             content += "\n"

@@ -16,23 +16,21 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
 ## Key Features
 
 - **Direct Web Integration**: Embeddable React/framework components allow developers to add browser automation capabilities directly within their web/mobile applications. Users can easily use voice/text to automatically execute workflows on your app.
-
 - **User-Friendly Extension**: A browser extension that allows users to create, manage, and run repeatable workflows directly in their browser.
-
 - **Knowledge Base Integration**: Add custom rules, documentation, and knowledge bases that the agent will prioritize over its LLM-based workflow, making the agent specific to YOUR application.
-
 - **Self-Improvement**: The agent improves over time based on how users interact with pages, even when not actively using the agent.
 
 ## Technology Stack
 
-- **Frontend**: 
+- **Frontend**:
+
   - React, Vite, TypeScript (for both component library and extension)
   - Packaged in a Turborepo for efficient management
+- **Backend**:
 
-- **Backend**: 
   - Python, FastAPI
+- **Database**:
 
-- **Database**: 
   - PostgreSQL (primary data storage)
   - Redis (caching)
   - Weaviate (vector database, deployed via Docker)
@@ -52,46 +50,48 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/SohamRatnaparkhi/navigator-ai.git
    cd navigator-ai
    ```
-
 2. **Install dependencies**
+
    ```bash
    # Install Python dependencies
    cd apps/server
    poetry install
-   
+
    # Install Node dependencies
    cd apps/extension
    pnpm install
    # OR
    npm install
    ```
+3. **Run the development server**
 
-4. **Run the development server**
    ```bash
    pnpm run dev:server
    # OR
    npm run dev:server
    ```
+4. Run Redis
 
-5. Run Redis
-     ```bash
-     cd apps/server
-     docker compose up -d
-     ```
-
+   ```bash
+   cd apps/server
+   docker compose up -d
+   ```
 5. **Build and install the extension**
+
    ```bash
    # Build the extension
    pnpm run build
    # OR
    npm run build
    ```
-   
+
    Then:
+
    - Open Chrome and navigate to `chrome://extensions`
    - Enable "Developer mode" (toggle in the top-right corner)
    - Click "Load unpacked" and select the `/apps/extension/dist` directory
@@ -100,43 +100,56 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
 ## Roadmap
 
 ### Core Functionality
+
+* [ ] **Deep agentic workflows**
+
+- Planner at the top/each step
+- Support for multiple actions like switching tabs and copy-pasting
+
 - [ ] **Visual Task Builder (Extension)**
+
   - Develop a drag-and-drop interface for creating automation workflows
   - Add support for conditional logic and branching
-
 - [ ] **Advanced DOM Interaction**
+
   - Implement sophisticated element selection methods using vision LLMs
   - Add support for handling dynamic content
 
 ### Intelligence & Learning
+
 - [ ] **Self-Improving Agents**
+
   - Implement feedback loops to learn from user corrections
   - Track user activity patterns (with permission) to improve automation
   - Develop metrics for measuring and reporting agent improvement
-
 - [ ] **Knowledge Base Enhancement**
+
   - Create an interface for managing custom rules and documentation
   - Implement priority weighting for different knowledge sources
   - Add support for importing existing documentation
 
 ### Integration & Expansion
+
 - [ ] **Third-party Integrations**
+
   - Website-specific integrations (AWS, GCP, Amazon, etc.)
   - Multiple LLM provider support
   - API connections to popular services
-
 - [ ] **Complex Web Interactions**
+
   - Support for iframes and shadow DOM
   - Handling authentication and user sessions
   - Intelligent error recovery and pause mechanisms
 
 ### User Experience
+
 - [ ] **Workflow Management**
+
   - Record and replay functionality for capturing user workflows
   - Scheduled tasks with time/interval specifications
   - Workflow sharing and importing capabilities
-
 - [ ] **Notification System**
+
   - Alert users when automation encounters obstacles
   - Provide detailed reporting on automation performance
   - Suggest improvements based on execution patterns
@@ -148,3 +161,9 @@ Contributions are welcome! It has lots of bugs and bad code. Please feel free to
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=sohamratnaparkhi/navigator-ai&type=Date)](https://www.star-history.com/#sohamratnaparkhi/navigator-ai&Date)

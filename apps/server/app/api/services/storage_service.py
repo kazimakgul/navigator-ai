@@ -114,10 +114,11 @@ class StorageService:
         return cls.get_redis().get(redis_key)
     
     @classmethod
-    def append_task_history(cls, task_id: str, action_data: dict) -> bool:
+    def append_task_history(cls, task_id: str, action_data: dict, prev_step_ans: str) -> bool:
         """Append action history for a task"""
         normalized_id = cls.normalize_task_id(task_id)
         redis_key = f"{settings.REDIS_PREFIX}{settings.REDIS_TASK_HISTORY_PREFIX}{normalized_id}"
+        redis_prev_step_ans_key = f"{settings.REDIS_PREFIX}{settings.REDIS_PREV_STEP_ANS_PREFIX}{normalized_id}"
         redis_client = cls.get_redis()
         
         print(f"Appending task history with Redis key: {redis_key}")
@@ -125,6 +126,7 @@ class StorageService:
         try:
             # Simply append the new item to the list (more efficient than recreating)
             redis_client.rpush(redis_key, json.dumps(action_data))
+            redis_client.set(redis_prev_step_ans_key, prev_step_ans)
             
             # check if added
             history_list = redis_client.lrange(redis_key, 0, -1)
@@ -132,10 +134,12 @@ class StorageService:
             
             # Make sure expiration is set
             redis_client.expire(redis_key, settings.REDIS_TASK_TTL)
+            redis_client.expire(redis_prev_step_ans_key, settings.REDIS_TASK_TTL)
             return True
         except Exception as e:
             print(f"Error appending task history: {str(e)}")
             return False
+
     
     @classmethod
     def get_task_history(cls, task_id: str) -> list:
@@ -165,3 +169,18 @@ class StorageService:
         except Exception as e:
             print(f"Error retrieving task history: {str(e)}")
             return []
+
+    @classmethod
+    def get_prev_step_ans(cls, task_id: str) -> str:
+        """Get previous step answer for a task"""
+        normalized_id = cls.normalize_task_id(task_id)
+        redis_key = f"{settings.REDIS_PREFIX}{settings.REDIS_PREV_STEP_ANS_PREFIX}{normalized_id}"
+        
+        print(f"Getting previous step answer with Redis key: {redis_key}")
+        
+        try:
+            redis_client = cls.get_redis()
+            return redis_client.get(redis_key)
+        except Exception as e:
+            print(f"Error retrieving previous step answer: {str(e)}")
+            return None

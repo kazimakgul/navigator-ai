@@ -15,6 +15,7 @@ class Settings(BaseModel):
     REDIS_PREFIX: str = "navigator:"
     REDIS_TASK_PREFIX: str = "task:"
     REDIS_TASK_HISTORY_PREFIX: str = "task_history:"
+    REDIS_PREV_STEP_ANS_PREFIX: str = "prev_step_ans:"
     REDIS_TASK_TTL: int = 60 * 60 * 24  # 24 hours
 
     # CORS settings

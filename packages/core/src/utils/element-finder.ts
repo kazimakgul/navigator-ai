@@ -133,22 +133,22 @@ export class ElementFinder {
             }
         }
 
-        if (element && !this.isElementVisible(element)) {
-            console.log('Element found but not visible, looking for alternatives');
+        // if (element && !this.isElementVisible(element)) {
+        //     console.log('Element found but not visible, looking for alternatives');
 
-            if (action.type === 'click') {
-                const parent = element.parentElement;
-                if (parent) {
-                    const nearbyElements = Array.from(parent.querySelectorAll('a, button, [role="button"], input[type="submit"]'))
-                        .filter(el => this.isElementVisible(el as Element));
+        //     if (action.type === 'click') {
+        //         const parent = element.parentElement;
+        //         if (parent) {
+        //             const nearbyElements = Array.from(parent.querySelectorAll('a, button, [role="button"], input[type="submit"]'))
+        //                 .filter(el => this.isElementVisible(el as Element));
 
-                    if (nearbyElements.length > 0) {
-                        element = nearbyElements[0] as Element;
-                        console.log('Found nearby visible interactive element instead:', element);
-                    }
-                }
-            }
-        }
+        //             if (nearbyElements.length > 0) {
+        //                 element = nearbyElements[0] as Element;
+        //                 console.log('Found nearby visible interactive element instead:', element);
+        //             }
+        //         }
+        //     }
+        // }
 
         if (!element && retryCount < 3) {
             console.log(`Element not found, waiting and retrying (attempt ${retryCount + 1}/3)`);

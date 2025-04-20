@@ -1,7 +1,7 @@
 <div align="center">
   <h1> Navigator AI</h1>
   <h2>Intelligent Automation Within the Browser</h2>
-  <p><em>Open-source browser automation powered by Gemini 2.5 Pro-exp</em></p>
+  <p><em>Open-source browser automation powered by Gemini 2.5 Pro</em></p>
 </div>
 
 ## Overview
@@ -11,7 +11,9 @@ Navigator AI empowers users and developers to seamlessly automate tasks within w
 - A **component library** for direct integration into web applications
 - A **browser extension** for end-user automation
 
-Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [Browser-Use](https://github.com/browser-use/browser-use) as Navigator AI is inspired by them and currently is a kind of an Chrome extension version that does what they do inside but inside your browser.
+Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [Browser-Use](https://github.com/browser-use/browser-use) as Navigator AI is inspired by them and currently is a kind of an Chrome extension version that does what they do inside but inside YOUR browser.
+
+P.s. Drop a star ⭐️ if you want a completely FREE and open-source alternative to Manus AI. I aim to make Navigator AI on par with Manus AI. Your support will motivate me a lot. Thank you
 
 ## Key Features
 
@@ -96,6 +98,19 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
    - Enable "Developer mode" (toggle in the top-right corner)
    - Click "Load unpacked" and select the `/apps/extension/dist` directory
    - The extension should now appear in your browser toolbar
+
+## Demos
+1. Prompt: "Help me buy an m4 macbook pro with student discount. I want 24 gb/1 tb variant."
+
+
+https://github.com/user-attachments/assets/12459b59-2d5f-4e1f-ad39-fb9b30bda9b4
+
+2. Prompt: Find the Navigator AI repo and create an issue.
+
+
+https://github.com/user-attachments/assets/eef7787a-ab76-4256-8bc1-a4ad3053fab4
+
+
 
 ## Roadmap
 

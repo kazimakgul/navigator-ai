@@ -16,7 +16,16 @@
   },
   "packageManager": "pnpm@10.4.1",
   "devDependencies": {
-    "turbo": "latest",
-    "concurrently": "latest"
+    "concurrently": "latest",
+    "turbo": "latest"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "core-js-pure",
+      "dtrace-provider",
+      "esbuild",
+      "sharp",
+      "spawn-sync"
+    ]
   }
 }

@@ -20,13 +20,14 @@
     "service_worker": "background.js",
     "type": "module"
   },
-  "permissions": ["storage", "activeTab", "scripting", "sidePanel", "windows"],
+  "permissions": ["storage", "activeTab", "scripting", "sidePanel", "windows", "clipboardWrite", "clipboardRead", "tabs"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "run_at": "document_idle"
+      "run_at": "document_idle",
+      "all_frames": true
     }
   ],
   "web_accessible_resources": [

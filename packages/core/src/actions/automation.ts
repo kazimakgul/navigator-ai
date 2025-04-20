@@ -437,6 +437,16 @@ export class AutomationHandler implements IAutomationHandler {
                     await new Promise(resolve => setTimeout(resolve, 3000));
                     break;
 
+                case 'copy':
+                    if (!element) return {success: false, message: `Action type '${action.type}' could not be executed as element was not found`};
+                    await this.domActions.copyElementToClipboard(element);
+                    break;
+                
+                case 'switchToTab':
+                    if (!action.tabId) return {success: false, message: `Action type '${action.type}' could not be executed as tabId was not provided`};
+                    await this.domActions.switchToTab(action.tabId);
+                    break;
+
                 default:
                     console.error('Unknown action type:', action.type);
                     this.cursorManager.hideCursor();

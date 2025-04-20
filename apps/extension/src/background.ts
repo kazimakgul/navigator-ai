@@ -103,7 +103,7 @@ chrome.action.onClicked.addListener((tab) => {
             .catch(err => {
                 console.error('Error sending toggleSidebar message:', err);
                 chrome.scripting.executeScript({
-                    target: { tabId: tab.id! },
+                    target: { tabId: tab.id!, allFrames: true },
                     files: ['content.js']
                 })
                     .then(() => {

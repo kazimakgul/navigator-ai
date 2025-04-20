@@ -17,6 +17,8 @@ You will receive:
 5. Results of the last action (if any)
 6. Open tabs with their IDs
 
+Only use the `switchToTab` action to switch to a different tab. Always check if we are already on that tab using current tab details.
+
 Use the `data_useful_for_next_step` field to provide any additional data that might be useful for future steps. This should ideally be textual data. Usually you can store any useful text on the page in this field as you will not be able to access it again for next step.
 
 # ELEMENT INTERACTION RULES

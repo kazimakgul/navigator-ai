@@ -17,6 +17,7 @@ export interface DOMUpdate {
     iterations: number;
     structure: DOMHashMap;
     openTabsWithIds: { id: number; url: string }[];
+    currentTab: { id: number; url: string };
 }
 
 export interface Message {

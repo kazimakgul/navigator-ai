@@ -263,6 +263,8 @@ async function handleDOMUpdate(message: Message) {
 
         iterationResults = iterationResults.filter(result => result.task_id === message.task_id);
 
+        const currentTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0] 
+
         // The DOM structure is already parsed by the content script
         const updateData: DOMUpdate = {
             task_id: message.task_id,
@@ -270,7 +272,11 @@ async function handleDOMUpdate(message: Message) {
             result: iterationResults,
             iterations: currentIterations,
             structure: message.dom_data.structure ?? {},
-            openTabsWithIds: (await chrome.tabs.query({})).map(tab => ({ id: tab.id || -1, url: tab.url || '' }))
+            openTabsWithIds: (await chrome.tabs.query({})).map(tab => ({ id: tab.id || -1, url: tab.url || '' })),
+            currentTab: {
+                id: currentTab?.id || -1,
+                url: currentTab?.url || ''
+            }
         };
 
         console.log("Request")

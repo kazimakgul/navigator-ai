@@ -35,6 +35,8 @@ async def update_task(update: DOMUpdate):
             element_tree=update.structure
         )
 
+
+
         task_text = TaskService.get_task(update.task_id)
 
         task_history = TaskService.get_task_history(update.task_id)
@@ -48,7 +50,7 @@ async def update_task(update: DOMUpdate):
             history=task_history
         )
 
-        system_message = build_system_prompt() + f"\n\nOpen tabs: {update.openTabsWithIds}" + f"\n\nPrevious step answer: {prev_step_ans}"
+        system_message = build_system_prompt() + f"\n\nOpen tabs: {update.openTabsWithIds}" + f"\n\nPrevious step answer: {prev_step_ans}\n\nCurrent tab: {update.currentTab}"
 
         result = generate(user_message, system_message)
         processed_result = process_element_references(result, xpath_map, selector_map)

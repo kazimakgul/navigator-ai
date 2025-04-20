@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # Specify the extension directory and output file
     # Adjust this path to match your project structure
     extension_dir = "./apps/extension"
-    output_file = "full_code.txt"
+    output_file = "extension.txt"
 
     write_extension_code_to_file(extension_dir, output_file)
     print(f"Code has been written to {output_file}")

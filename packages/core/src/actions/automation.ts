@@ -213,6 +213,15 @@ export class AutomationHandler implements IAutomationHandler {
     }
 
     private async findElement(action: Action, retryCount = 0): Promise<Element | null> {
+        if (!action) {
+            console.error('Invalid action:', action);
+            return null;
+        }
+        
+        if (action.type == 'url' || action.type == 'navigate' || action.type == 'switchToTab') {
+            return null;
+        }
+        
         console.log(`Attempting to find element (attempt ${retryCount + 1})`, action);
 
         let element: Element | null = null;
@@ -295,22 +304,22 @@ export class AutomationHandler implements IAutomationHandler {
             }
         }
 
-        if (element && !this.elementFinder.isElementVisible(element)) {
-            console.log('Element found but not visible, looking for alternatives');
+        // if (element && !this.elementFinder.isElementVisible(element)) {
+        //     console.log('Element found but not visible, looking for alternatives');
 
-            if (action.type === 'click') {
-                const parent = element.parentElement;
-                if (parent) {
-                    const nearbyElements = Array.from(parent.querySelectorAll('a, button, [role="button"], input[type="submit"]'))
-                        .filter(el => this.elementFinder.isElementVisible(el as Element));
+        //     if (action.type === 'click') {
+        //         const parent = element.parentElement;
+        //         if (parent) {
+        //             const nearbyElements = Array.from(parent.querySelectorAll('a, button, [role="button"], input[type="submit"]'))
+        //                 .filter(el => this.elementFinder.isElementVisible(el as Element));
 
-                    if (nearbyElements.length > 0) {
-                        element = nearbyElements[0] as Element;
-                        console.log('Found nearby visible interactive element instead:', element);
-                    }
-                }
-            }
-        }
+        //             if (nearbyElements.length > 0) {
+        //                 element = nearbyElements[0] as Element;
+        //                 console.log('Found nearby visible interactive element instead:', element);
+        //             }
+        //         }
+        //     }
+        // }
 
         if (!element && retryCount < 3) {
             console.log(`Element not found, waiting and retrying (attempt ${retryCount + 1}/3)`);
@@ -361,7 +370,7 @@ export class AutomationHandler implements IAutomationHandler {
             console.log('Executing action:', action.type, action);
 
             const element = await this.findElement(action);
-            if (!element && action.type !== 'navigate' && action.type !== 'url') {
+            if (!element && action.type !== 'navigate' && action.type !== 'url' && action.type !== 'switchToTab') {
                 console.error('Element not found for action:', action);
 
                 if (retryCount < 2) {
@@ -373,7 +382,7 @@ export class AutomationHandler implements IAutomationHandler {
                 return { success: false, message: `Element not found for action type: ${action.type}${action.selector ? `, selector: ${action.selector}` : ''}${action.xpath_ref ? `, xpath: ${action.xpath_ref}` : ''}${action.element_id ? `, element_id: ${action.element_id}` : ''}` };
             }
 
-            if (element && action.type !== 'navigate' && action.type !== 'url') {
+            if (element && action.type !== 'navigate' && action.type !== 'url' && action.type !== 'switchToTab') {
                 if (this.debugMode) {
                     const rect = element.getBoundingClientRect();
                     console.log('Element details:', {
@@ -394,7 +403,7 @@ export class AutomationHandler implements IAutomationHandler {
                 await this.cursorManager.moveCursorToElement(element);
             }
 
-            if (!element && (action.type !== 'navigate' && action.type !== 'url'))
+            if (!element && (action.type !== 'navigate' && action.type !== 'url' && action.type !== 'switchToTab'))
                 return {
                     success: false,
                     message: `Element not found for action type: ${action.type}${action.selector ? `, selector: ${action.selector}` : ''}${action.xpath_ref ? `, xpath: ${action.xpath_ref}` : ''}${action.element_id ? `, element_id: ${action.element_id}` : ''}`
@@ -443,8 +452,8 @@ export class AutomationHandler implements IAutomationHandler {
                     break;
                 
                 case 'switchToTab':
-                    if (!action.tabId) return {success: false, message: `Action type '${action.type}' could not be executed as tabId was not provided`};
-                    await this.domActions.switchToTab(action.tabId);
+                    if (!action.tab_id) return {success: false, message: `Action type '${action.type}' could not be executed as tab_id was not provided`};
+                    await this.domActions.switchToTab(action.tab_id);
                     break;
 
                 default:

@@ -11,9 +11,9 @@ let isPaused = false;
 
 // let iterationResults: ExecuteActionResult[] = [];
 
-let lastUpdateResponse: { 
-    timestamp: string; 
-    task_id: string; 
+let lastUpdateResponse: {
+    timestamp: string;
+    task_id: string;
     data: any;
 } | null = null;
 
@@ -45,17 +45,17 @@ function isValidUrl(url: string): boolean {
 // Initialize side panel settings
 chrome.runtime.onInstalled.addListener(() => {
     console.log('Extension installed, setting up sidePanel...');
-    
+
     // Set the default state of the side panel
     if (chrome.sidePanel) {
         console.log('Chrome sidePanel API available, configuring...');
-        
+
         // Configure the sidePanel
         chrome.sidePanel.setOptions({
             enabled: true,
             path: 'popup.html'
         });
-        
+
         // Initialize the state in storage
         chrome.storage.local.get(['sidePanelState'], (result) => {
             if (!result.sidePanelState) {
@@ -70,13 +70,13 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.action.onClicked.addListener((tab) => {
     console.log('Extension icon clicked, toggling sidebar in tab:', tab.id);
-    
+
     // Check if Chrome's sidePanel API is available
     if (chrome.sidePanel) {
         // Check current state from storage
         chrome.storage.local.get(['sidePanelState'], (result) => {
             const isOpen = result.sidePanelState === 'open';
-            
+
             // Toggle the sidePanel
             if (isOpen) {
                 // The sidePanel API doesn't have a direct close method
@@ -96,7 +96,7 @@ chrome.action.onClicked.addListener((tab) => {
         });
         return;
     }
-    
+
     // Fall back to the custom sidebar implementation for non-Chrome browsers
     if (tab.id && tab.url && isValidUrl(tab.url)) {
         chrome.tabs.sendMessage(tab.id, { type: 'toggleSidebar' })
@@ -120,7 +120,7 @@ chrome.action.onClicked.addListener((tab) => {
 
 chrome.runtime.onMessage.addListener(async (message: Message, sender, sendResponse) => {
     console.log('Background received message:', message.type, sender?.tab?.id);
-    
+
     try {
         // Handle different message types
         if (message.type === 'startTask') {
@@ -144,21 +144,21 @@ chrome.runtime.onMessage.addListener(async (message: Message, sender, sendRespon
         } else if (message.type === 'check_processing_status') {
             // Check if the task is marked as completed by checking multiple sources
             const storageData = await chrome.storage.local.get(['activeSession', 'taskState', 'lastUpdateResponse']);
-            
+
             // Check multiple completion indicators
             const sessionDone = storageData.activeSession?.status === 'completed';
             const lastUpdateDone = storageData.lastUpdateResponse?.data?.result?.is_done === true;
             const processingDone = storageData.taskState?.processingStatus === 'completed';
-            
+
             // If ANY of these indicate completion, consider the workflow done
             const isDone = sessionDone || lastUpdateDone || processingDone;
-            
+
             console.log('Checking processing status, isDone:', isDone, {
                 sessionDone,
                 lastUpdateDone,
                 processingDone
             });
-            
+
             sendResponse({ isDone });
         } else if (message.type === 'toggleSidebar') {
             // Find the active tab and send toggle message
@@ -192,7 +192,29 @@ chrome.runtime.onMessage.addListener(async (message: Message, sender, sendRespon
             // Reset the entire workflow
             await resetWorkflow();
             sendResponse({ success: true });
-        } 
+        } else if (message.type === 'switchTab') {
+            // Handle tab switching request from content script
+            if (message.tabId) {
+                try {
+                    const id = Number(message.tabId);
+                    console.log(`Switching to tab ${id} abcd`);
+                    chrome.tabs.get(id, (tab) => {
+                        if (tab) {
+                            chrome.tabs.update(id, { active: true });
+                            sendResponse({ success: true });
+                        } else {
+                            console.error('Tab with id', id, 'not found');
+                            sendResponse({ success: false, error: 'Tab with id ' + id + ' not found' });
+                        }
+                    });
+                } catch (error) {
+                    console.error('Error switching tab:', error);
+                    sendResponse({ success: false, error: String(error) });
+                }
+            } else {
+                sendResponse({ success: false, error: 'No tabId provided' });
+            }
+        }
     } catch (error) {
         console.error('Error in background script:', error);
         sendResponse({ success: false, error: 'Background script error' });
@@ -204,18 +226,18 @@ chrome.runtime.onMessage.addListener(async (message: Message, sender, sendRespon
 // Helper function to update processing status
 async function updateProcessingStatus(task_id: string, status: ProcessingStatus) {
     console.log(`Updating processing status for task ${task_id} to ${status}`);
-    
+
     const result = await chrome.storage.local.get(['taskState']);
     let taskState = result.taskState || {};
-    
+
     taskState = {
         ...taskState,
         processingStatus: status,
         lastUpdateTimestamp: new Date().toISOString()
     };
-    
+
     await chrome.storage.local.set({ taskState });
-    
+
     // Also broadcast this status change to all listeners
     chrome.runtime.sendMessage({
         type: 'processingStatusUpdate',
@@ -233,7 +255,7 @@ async function handleDOMUpdate(message: Message) {
         }
 
         console.log('Received pre-processed DOM data for task:', message.task_id);
-        
+
         // Update status to indicate we're in the update process
         await updateProcessingStatus(message.task_id, 'updating');
 
@@ -261,13 +283,13 @@ async function handleDOMUpdate(message: Message) {
                 startTime: new Date().toISOString()
             }
         });
-        
+
         await updateProcessingStatus(message.task_id, 'waiting_for_server');
-        
+
         console.log('Sending DOM update to API:', updateData.task_id);
         let response;
         let data;
-        
+
         try {
             response = await fetch(`${API_BASE_URL}/tasks/update`, {
                 method: 'POST',
@@ -276,21 +298,21 @@ async function handleDOMUpdate(message: Message) {
                 },
                 body: JSON.stringify(updateData),
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(`Server error ${response.status}: ${JSON.stringify(errorData)}`);
             }
-            
+
             data = await response.json();
             console.log('DOM update successful:', data);
-            
+
             lastUpdateResponse = {
                 timestamp: new Date().toISOString(),
                 task_id: message.task_id,
                 data: data
             };
-            
+
             // Save the update response to storage for content script to retrieve
             await chrome.storage.local.set({
                 lastUpdateResponse: lastUpdateResponse,
@@ -301,11 +323,11 @@ async function handleDOMUpdate(message: Message) {
                     completedTime: new Date().toISOString()
                 }
             });
-            
+
         } catch (error) {
             console.error('Error in server update:', error);
             await updateProcessingStatus(message.task_id, 'error');
-            
+
             // Store error state
             await chrome.storage.local.set({
                 currentDOMUpdate: {
@@ -315,10 +337,10 @@ async function handleDOMUpdate(message: Message) {
                     completedTime: new Date().toISOString()
                 }
             });
-            
+
             throw error; // Re-throw for later handling
         }
-        
+
         // Update status based on the response
         if (data.result?.actions && data.result.actions.length > 0) {
             // If there are actions, indicate they need to be executed
@@ -327,19 +349,19 @@ async function handleDOMUpdate(message: Message) {
             // Otherwise mark as completed for this iteration
             await updateProcessingStatus(message.task_id, 'completed');
         }
-        
+
         // Store the is_done flag but don't stop monitoring immediately
         // This allows actions to be executed before stopping
         const isDone = data.result?.is_done && activeSession;
-        
+
         // Process this update normally and let the DOM processor handle the completion
         // after executing any actions
-        
+
         // Add the is_done flag to the console log for debugging
         if (isDone) {
             console.log('Task marked as done by the server, will stop after actions are executed');
         }
-        
+
         // Explicitly set is_done in the response so it can be picked up by the processor
         return {
             success: true,
@@ -353,7 +375,7 @@ async function handleDOMUpdate(message: Message) {
             activeSession.status = 'error';
             await chrome.storage.local.set({ activeSession });
         }
-        
+
         // Update processing status to error
         if (message.task_id) {
             await updateProcessingStatus(message.task_id, 'error');
@@ -417,7 +439,7 @@ async function startMonitoring(task_id: string) {
 
     currentIterations = 0;
     isPaused = false;
-    
+
     let isUpdateInProgress = false;
 
     const processOneIteration = async () => {
@@ -425,26 +447,26 @@ async function startMonitoring(task_id: string) {
             console.log('Monitoring is paused, skipping iteration');
             return;
         }
-        
+
         if (isUpdateInProgress) {
             console.log('Update already in progress, skipping this iteration');
             return;
         }
-        
+
         isUpdateInProgress = true;
-        
+
         try {
             console.log('Processing DOM for iteration:', currentIterations + 1);
-            
+
             const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
             if (!tabs[0]?.id || !tabs[0]?.url || !isValidUrl(tabs[0].url)) {
                 console.log('Cannot process DOM on this page (likely a chrome:// URL)');
                 isUpdateInProgress = false;
                 return;
             }
-            
+
             const tabId = tabs[0].id;
-            
+
             try {
                 await chrome.tabs.sendMessage(tabId, { type: 'ping' });
             } catch (error) {
@@ -454,10 +476,10 @@ async function startMonitoring(task_id: string) {
                     files: ['content.js']
                 });
             }
-            
+
             // wait for full page to load roughly for 3 seconds
             await new Promise(resolve => setTimeout(resolve, 3000));
-            
+
             const response = await new Promise<any>((resolve) => {
                 chrome.tabs.sendMessage(tabId, {
                     type: 'singleDOMProcess',
@@ -471,18 +493,18 @@ async function startMonitoring(task_id: string) {
                     }
                 });
             });
-            
+
             console.log('DOM processing complete:', response);
-            
+
             if (response?.success) {
                 currentIterations++;
-                
+
                 // Update popup with current iterations
                 chrome.runtime.sendMessage({
                     type: 'iterationUpdate',
                     iterations: currentIterations
                 });
-                
+
                 const taskState = await chrome.storage.local.get(['taskState']);
                 if (taskState.taskState) {
                     await chrome.storage.local.set({
@@ -492,7 +514,7 @@ async function startMonitoring(task_id: string) {
                         }
                     });
                 }
-                
+
                 // Check if task is done
                 if (response.isDone) {
                     console.log('Task marked as done, stopping monitoring');
@@ -512,14 +534,14 @@ async function startMonitoring(task_id: string) {
             isUpdateInProgress = false;
         }
     };
-    
+
     // Set up interval that respects the previous iteration completion
     monitoringInterval = setInterval(async () => {
         if (!isUpdateInProgress && !isPaused) {
             await processOneIteration();
         }
     }, 2000);
-    
+
     // Start the first iteration immediately
     processOneIteration();
 }
@@ -530,7 +552,7 @@ function stopMonitoring() {
         clearInterval(monitoringInterval);
         monitoringInterval = null;
     }
-    
+
     // Reset task state to idle
     chrome.storage.local.get(['taskState'], async (result) => {
         if (result.taskState) {
@@ -556,7 +578,7 @@ function pauseMonitoring() {
         activeSession.isPaused = true;
         chrome.storage.local.set({ activeSession });
     }
-    
+
     // Update task state to paused
     chrome.storage.local.get(['taskState'], async (result) => {
         if (result.taskState) {
@@ -579,7 +601,7 @@ function resumeMonitoring() {
         activeSession.isPaused = false;
         chrome.storage.local.set({ activeSession });
     }
-    
+
     // Update task state to idle (ready for next process)
     chrome.storage.local.get(['taskState'], async (result) => {
         if (result.taskState) {
@@ -597,16 +619,16 @@ function resumeMonitoring() {
 // Function to reset the entire workflow
 async function resetWorkflow() {
     console.log('Resetting entire workflow');
-    
+
     // Stop any ongoing monitoring
     stopMonitoring();
-    
+
     // Reset iteration counter
     currentIterations = 0;
-    
+
     // Reset active session
     activeSession = null;
-    
+
     // Clear all stored data
     await chrome.storage.local.set({
         activeSession: null,
@@ -614,12 +636,12 @@ async function resetWorkflow() {
         currentDOMUpdate: null,
         lastUpdateResponse: null
     });
-    
+
     // Notify content script and UI about reset
     chrome.runtime.sendMessage({
         type: 'workflowReset'
     }).catch(err => console.error('Error broadcasting workflow reset:', err));
-    
+
     // Get active tab to inform content script
     try {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -630,6 +652,6 @@ async function resetWorkflow() {
     } catch (error) {
         console.error('Error communicating reset to content script:', error);
     }
-    
+
     console.log('Workflow reset complete');
 }

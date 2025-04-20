@@ -58,7 +58,7 @@ export interface Action {
     text?: string;
     amount?: number;
     url?: string;
-    tabId?: number;
+    tab_id?: number;
 } 
 
 export interface AutomationOptions {

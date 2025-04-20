@@ -26,11 +26,13 @@ class Action(BaseModel):
     text: Optional[str] = None
     amount: Optional[int] = None
     url: Optional[str] = None
+    tab_id: Optional[str] = None
 
 class CurrentState(BaseModel):
     page_summary: str
     evaluation_previous_goal: str
     next_goal: str
+    data_useful_for_next_step: str
 
 class GenerateResponse(BaseModel):
     current_state: CurrentState
@@ -68,7 +70,8 @@ def parse_json_from_text(text):
         "current_state": {
             "page_summary": "Failed to parse LLM output.",
             "evaluation_previous_goal": "Unknown",
-            "next_goal": "Try different approach"
+            "next_goal": "Try different approach",
+            "data_useful_for_next_step": ""
         },
         "actions": [],
         "is_done": False
@@ -77,7 +80,7 @@ def parse_json_from_text(text):
 
 def generate(user_prompt, system_prompt) -> GenerateResponse:
 
-    model = "gemini-2.5-pro-exp-03-25"
+    model = "gemini-2.5-pro-preview-03-25"
     contents = [
         types.Content(
             role="user",
@@ -103,7 +106,7 @@ def generate(user_prompt, system_prompt) -> GenerateResponse:
                     type=genai.types.Type.OBJECT,
                     enum=[],
                     required=["page_summary",
-                              "evaluation_previous_goal", "next_goal"],
+                              "evaluation_previous_goal", "next_goal", "data_useful_for_next_step"],
                     properties={
                         "page_summary": genai.types.Schema(
                             type=genai.types.Type.STRING,
@@ -112,6 +115,9 @@ def generate(user_prompt, system_prompt) -> GenerateResponse:
                             type=genai.types.Type.STRING,
                         ),
                         "next_goal": genai.types.Schema(
+                            type=genai.types.Type.STRING,
+                        ),
+                        "data_useful_for_next_step": genai.types.Schema(
                             type=genai.types.Type.STRING,
                         ),
                     },
@@ -142,6 +148,9 @@ def generate(user_prompt, system_prompt) -> GenerateResponse:
                                 type=genai.types.Type.INTEGER,
                             ),
                             "url": genai.types.Schema(
+                                type=genai.types.Type.STRING,
+                            ),
+                            "tab_id": genai.types.Schema(
                                 type=genai.types.Type.STRING,
                             ),
                         },

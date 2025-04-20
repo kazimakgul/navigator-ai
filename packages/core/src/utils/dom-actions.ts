@@ -158,7 +158,7 @@ export class DomActions {
 
         await new Promise(resolve => setTimeout(resolve, 200));
     }
-    
+
     public async copyElementToClipboard(element: Element): Promise<void> {
         try {
             // copy element html to clipboard
@@ -171,8 +171,18 @@ export class DomActions {
 
     public async switchToTab(tabId: number): Promise<void> {
         try {
+            // Send a message to the background script to switch tabs
             // @ts-ignore
-            await chrome.tabs.update(tabId, { active: true });
+            chrome.runtime.sendMessage({
+                type: 'switchTab',
+                tabId: tabId
+            }, (response) => {
+                if (response && response.success) {
+                    console.log(`Successfully switched to tab ${tabId}`);
+                } else {
+                    console.error('Failed to switch tab:', response?.error || 'Unknown error');
+                }
+            });
         } catch (error) {
             console.error('Failed to switch to tab:', error);
         }

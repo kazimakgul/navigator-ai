@@ -20,7 +20,7 @@ export interface DOMUpdate {
 }
 
 export interface Message {
-    type: 'startTask' | 'startMonitoring' | 'stopMonitoring' | 'processDOM' | 'toggleSidebar' | 'toggleUI' | 'updateSidebarState' | 'dom_update' | 'pauseMonitoring' | 'resumeMonitoring' | 'executeActions' | 'startSequentialProcessing' | 'check_processing_status' | 'resetIterations' | 'singleDOMProcess' | 'ping' | 'resetWorkflow' | 'checkDomainChange' | 'updateProcessingStatus' | 'openSidePanel' | 'closeSidePanel' | 'toggleSidePanel';
+    type: 'startTask' | 'startMonitoring' | 'stopMonitoring' | 'processDOM' | 'toggleSidebar' | 'toggleUI' | 'updateSidebarState' | 'dom_update' | 'pauseMonitoring' | 'resumeMonitoring' | 'executeActions' | 'startSequentialProcessing' | 'check_processing_status' | 'resetIterations' | 'singleDOMProcess' | 'ping' | 'resetWorkflow' | 'checkDomainChange' | 'updateProcessingStatus' | 'openSidePanel' | 'closeSidePanel' | 'toggleSidePanel' | 'switchTab';
     task?: string;
     task_id?: string;
     dom_data?: FrontendDOMState;
@@ -34,6 +34,7 @@ export interface Message {
     isDone?: boolean;   // Property for signaling if processing is complete
     currentUrl?: string; // Current URL for domain change detection
     iterationResults?: ExecuteActionResult[];
+    tabId?: number;
 }
 
 // Processing status for DOM operations

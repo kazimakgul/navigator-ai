@@ -5,134 +5,135 @@ import { captureIframeContents } from './iframe';
 import { highlightInteractiveElements } from '../highlight';
 import { handleAutomationActions } from '../automation';
 
-export async function processDOM(task_id: string): Promise<FrontendDOMState> {
-    try {
-        console.log('Processing DOM for task:', task_id);
+// export async function processDOM(task_id: string): Promise<FrontendDOMState> {
+//     try {
+//         console.log('Processing DOM for task:', task_id);
 
-        const htmlContent = document.documentElement.outerHTML;
+//         const htmlContent = document.documentElement.outerHTML;
         
-        const processedHtml = await captureIframeContents(htmlContent);
+//         const processedHtml = await captureIframeContents(htmlContent);
         
-        console.log('Sending HTML with iframe contents to server for parsing...');
-        const domStructure = await parseDOMonServer(processedHtml);
-        console.log('Received parsed DOM structure from server');
+//         console.log('Sending HTML with iframe contents to server for parsing...');
+//         const domStructure = await parseDOMonServer(processedHtml);
+//         console.log('Received parsed DOM structure from server');
 
-        const domData: FrontendDOMState = {
-            url: window.location.href,
-            html: processedHtml,
-            title: document.title,
-            timestamp: new Date().toISOString(),
-            structure: domStructure
-        };
+//         const domData: FrontendDOMState = {
+//             url: window.location.href,
+//             html: processedHtml,
+//             title: document.title,
+//             timestamp: new Date().toISOString(),
+//             structure: domStructure
+//         };
 
-        console.log('Highlighting interactive elements');
-        highlightInteractiveElements(domStructure);
+//         console.log('Highlighting interactive elements');
+//         highlightInteractiveElements(domStructure);
 
-        console.log('Sending DOM update to background, structure size:',
-            JSON.stringify(domData.structure).length, 'bytes');
+//         console.log('Sending DOM update to background, structure size:',
+//             JSON.stringify(domData.structure).length, 'bytes');
 
-        // Send data to background script and wait for complete response including any actions
-        return new Promise<FrontendDOMState>((resolve, reject) => {
-            chrome.runtime.sendMessage({
-                type: 'dom_update',
-                task_id,
-                dom_data: domData,
-                result: []
-            }, async response => {
-                console.log('Background script response from DOM update:', response);
+//         // Send data to background script and wait for complete response including any actions
+//         return new Promise<FrontendDOMState>((resolve, reject) => {
+//             chrome.runtime.sendMessage({
+//                 type: 'dom_update',
+//                 task_id,
+//                 dom_data: domData,
+//                 result: []
+//             }, async response => {
+//                 console.log('Background script response from DOM update:', response);
                 
-                if (response && response.data) {
-                    // Check if there are actions to execute and wait for them to complete
-                    if (response.data.result?.actions && response.data.result.actions.length > 0) {
-                        console.log('Waiting for actions to complete...');
-                        try {
-                            // Wait for actions from the update response to complete
-                            // before resolving the processDOM promise
-                            const actionResults = await handleAutomationActions(response.data.result.actions);
-                            console.log('Action execution results:', actionResults);
+//                 if (response && response.data) {
+//                     // Check if there are actions to execute and wait for them to complete
+//                     if (response.data.result?.actions && response.data.result.actions.length > 0) {
+//                         console.log('Waiting for actions to complete...');
+//                         try {
+//                             // Wait for actions from the update response to complete
+//                             // before resolving the processDOM promise
+//                             const actionResults = await handleAutomationActions(response.data.result.actions);
+//                             console.log('Action execution results:', actionResults);
                             
-                            // Only resolve after actions are complete
-                            resolve(domData);
-                        } catch (actionError) {
-                            console.error('Error executing actions:', actionError);
-                            reject(new Error('Failed to execute actions: ' + (actionError as Error).message));
-                        }
-                    } else {
-                        // No actions to execute, resolve immediately
-                        resolve(domData);
-                    }
-                } else if (response && response.success) {
-                    resolve(domData);
-                } else {
-                    reject(new Error('Failed to update DOM: ' + (response?.error || 'Unknown error')));
-                }
-            });
-        });
-    } catch (error) {
-        console.error('Error processing DOM:', error);
-        throw error;
-    }
-}
+//                             // Only resolve after actions are complete
+//                             resolve(domData);
+//                         } catch (actionError) {
+//                             console.error('Error executing actions:', actionError);
+//                             reject(new Error('Failed to execute actions: ' + (actionError as Error).message));
+//                         }
+//                     } else {
+//                         // No actions to execute, resolve immediately
+//                         resolve(domData);
+//                     }
+//                 } else if (response && response.success) {
+//                     resolve(domData);
+//                 } else {
+//                     reject(new Error('Failed to update DOM: ' + (response?.error || 'Unknown error')));
+//                 }
+//             });
+//         });
+//     } catch (error) {
+//         console.error('Error processing DOM:', error);
+//         throw error;
+//     }
+// }
 
-/**
- * Process DOM sequentially with multiple iterations
- * @param task_id The task ID
- * @param maxIterations Maximum number of iterations
- * @returns Promise with the result of the processing
- */
-export async function sequentialDOMProcessing(task_id: string, maxIterations = 10) {
-    // Always start with 0 iterations when workflow starts
-    let iteration = 0;
-    let isDone = false;
+// /**
+//  * Process DOM sequentially with multiple iterations
+//  * @param task_id The task ID
+//  * @param maxIterations Maximum number of iterations
+//  * @returns Promise with the result of the processing
+//  */
+// export async function sequentialDOMProcessing(task_id: string, maxIterations = 10) {
+//     // Always start with 0 iterations when workflow starts
+//     let iteration = 0;
+//     let isDone = false;
     
-    console.log('Starting sequential DOM processing for task:', task_id);
+//     console.log('Starting sequential DOM processing for task:', task_id);
     
-    // Notify background script to reset iteration counter
-    await new Promise<void>((resolve) => {
-        chrome.runtime.sendMessage({
-            type: 'resetIterations',
-            task_id
-        }, () => {
-            resolve();
-        });
-    });
+//     // Notify background script to reset iteration counter
+//     await new Promise<void>((resolve) => {
+//         chrome.runtime.sendMessage({
+//             type: 'resetIterations',
+//             task_id
+//         }, () => {
+//             resolve();
+//         });
+//     });
     
-    while (!isDone && iteration < maxIterations) {
-        console.log(`Starting iteration ${iteration + 1} of DOM processing`);
+//     while (!isDone && iteration < maxIterations) {
+//         console.log(`Starting iteration ${iteration + 1} of DOM processing`);
         
-        try {
-            // Step 1: Parse and update DOM, which now also waits for any actions to complete
-            // This ensures the entire process is sequential
-            await processDOM(task_id);
+//         try {
+//             // Step 1: Parse and update DOM, which now also waits for any actions to complete
+//             // This ensures the entire process is sequential
+//             await processDOM(task_id);
             
-            // Increment iteration counter after processing is complete
-            iteration++;
+//             // Increment iteration counter after processing is complete
+//             iteration++;
             
-            // Step 2: Check if processing is done
-            // After actions have completed, check if the task is marked as done
-            isDone = await checkIfProcessingDone(task_id);
+//             // Step 2: Check if processing is done
+//             // After actions have completed, check if the task is marked as done
+//             isDone = await checkIfProcessingDone(task_id);
             
-            console.log(`Iteration ${iteration} complete. isDone:`, isDone);
+//             console.log(`Iteration ${iteration} complete. isDone:`, isDone);
             
-            // Add a small delay between iterations to avoid overwhelming the system
-            if (!isDone && iteration < maxIterations) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        } catch (error) {
-            console.error(`Error in iteration ${iteration + 1}:`, error);
-            break;
-        }
-    }
+//             // Add a small delay between iterations to avoid overwhelming the system
+//             if (!isDone && iteration < maxIterations) {
+//                 await new Promise(resolve => setTimeout(resolve, 500));
+//             }
+//         } catch (error) {
+//             console.error(`Error in iteration ${iteration + 1}:`, error);
+//             break;
+//         }
+//     }
     
-    console.log(`Sequential DOM processing complete after ${iteration} iterations`);
-    return { success: true, iterations: iteration, isDone };
-}
+//     console.log(`Sequential DOM processing complete after ${iteration} iterations`);
+//     return { success: true, iterations: iteration, isDone };
+// }
 
 /**
  * Perform a single iteration of DOM processing
  * @param task_id The task ID
  * @param iterationResults The results of previous iterations
  * @returns Promise with the result of the processing
+ * Only this is useful
  */
 export async function singleDOMProcessIteration(task_id: string): Promise<{ 
     success: boolean; 

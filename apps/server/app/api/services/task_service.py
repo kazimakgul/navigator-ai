@@ -32,3 +32,8 @@ class TaskService:
     def get_task_history(task_id: str) -> list:
         """Get task history from storage"""
         return StorageService.get_task_history(task_id)
+    
+    @staticmethod
+    def get_prev_step_ans(task_id: str) -> str:
+        """Get previous step answer for a task"""
+        return StorageService.get_prev_step_ans(task_id)

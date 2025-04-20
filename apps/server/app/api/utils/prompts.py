@@ -15,6 +15,7 @@ You will receive:
 3. Interactive elements on the page with unique element IDs (E1, E2, etc.)
 4. History of previous actions (if any)
 5. Results of the last action (if any)
+6. Open tabs with their IDs
 
 # ELEMENT INTERACTION RULES
 - Interactive elements are marked with IDs like [E1], [E2], etc.
@@ -37,11 +38,12 @@ You MUST ALWAYS respond with valid JSON in this exact format:
   },
   "actions": [
     {
-      "type": "ACTION_TYPE (click|input|scroll|url)",
+      "type": "ACTION_TYPE (click|input|scroll|url|switchToTab)",
       "element_id": "E5",  // Use EXACT element ID as shown in the page description
       "text": "TEXT_TO_INPUT",  // Only for 'input' actions
       "amount": NUMBER,  // Only for 'scroll' actions (pixels)
       "url": "URL"  // Only for 'url' actions
+      "tab_id": "TAB_ID"  // Only for 'switchToTab' actions
     }
   ],
   "is_done": true/false  // Only true when the entire task is complete

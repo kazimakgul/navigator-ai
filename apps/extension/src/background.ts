@@ -247,7 +247,8 @@ async function handleDOMUpdate(message: Message) {
             dom_data: message.dom_data,
             result: iterationResults,
             iterations: currentIterations,
-            structure: message.dom_data.structure ?? {}
+            structure: message.dom_data.structure ?? {},
+            openTabsWithIds: (await chrome.tabs.query({})).map(tab => ({ id: tab.id || -1, url: tab.url || '' }))
         };
 
         console.log("Request")

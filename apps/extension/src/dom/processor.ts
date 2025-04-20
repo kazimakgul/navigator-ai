@@ -12,7 +12,7 @@ export async function processDOM(task_id: string): Promise<FrontendDOMState> {
         const htmlContent = document.documentElement.outerHTML;
         
         const processedHtml = await captureIframeContents(htmlContent);
-
+        
         console.log('Sending HTML with iframe contents to server for parsing...');
         const domStructure = await parseDOMonServer(processedHtml);
         console.log('Received parsed DOM structure from server');

@@ -16,6 +16,7 @@ export interface DOMUpdate {
     result: unknown[];
     iterations: number;
     structure: DOMHashMap;
+    openTabsWithIds: { id: number; url: string }[];
 }
 
 export interface Message {

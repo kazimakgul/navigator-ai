@@ -46,7 +46,7 @@ async def update_task(update: DOMUpdate):
             history=task_history
         )
 
-        system_message = build_system_prompt()
+        system_message = build_system_prompt() + f"\n\nOpen tabs: {update.openTabsWithIds}"
         
         result = generate(user_message, system_message)
         processed_result = process_element_references(result, xpath_map, selector_map)

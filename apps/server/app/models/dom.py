@@ -60,6 +60,7 @@ class DOMUpdate(BaseModel):
     result: List[Dict] = Field(default_factory=list)
     iterations: int = 0
     structure: Dict[str, Any] = Field(default_factory=dict)
+    openTabsWithIds: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class DOMUpdateResponse(BaseModel):

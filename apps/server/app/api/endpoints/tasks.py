@@ -11,7 +11,7 @@ from app.models.tasks import TaskCreate, TaskResponse
 from fastapi import APIRouter, HTTPException
 from datetime import datetime
 
-from app.api.utils.llm import generate, generate_with_open_router
+from app.api.utils.llm import generate
 
 router = APIRouter()
 

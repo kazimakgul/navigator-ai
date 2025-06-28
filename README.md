@@ -75,7 +75,13 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
    npm install
    ```
 
-3. **Run the development server**
+3. **Configure environment variables**
+
+   Copy `apps/server/.env.example` to `apps/server/.env` and fill in the keys.
+   Set `LLM_PROVIDER=openai` and provide your `OPENAI_API_KEY` if you want to
+   use OpenAI models instead of the default Gemini service.
+
+4. **Run the development server**
 
    ```bash
    pnpm run dev:server
@@ -83,14 +89,14 @@ Consider it as Cursor/Windsurf for websites and applications. Big shoutout to [B
    npm run dev:server
    ```
 
-4. **Run Redis**
+5. **Run Redis**
 
    ```bash
    cd apps/server
    docker compose up -d
    ```
 
-5. **Build and install the extension**
+6. **Build and install the extension**
 
    ```bash
    # Build the extension

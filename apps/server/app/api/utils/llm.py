@@ -14,9 +14,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = genai.Client(
+gemini_client = genai.Client(
     api_key=os.environ.get("GEMINI_API_KEY"),
 )
+
+openai_client = OpenAI(
+    api_key=os.environ.get("OPENAI_API_KEY"),
+    base_url=os.environ.get("OPENAI_API_BASE"),
+)
+
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "gemini").lower()
 
 class Action(BaseModel):
     type: str
@@ -78,7 +85,7 @@ def parse_json_from_text(text):
     }
 
 
-def generate(user_prompt, system_prompt) -> GenerateResponse:
+def generate_with_gemini(user_prompt, system_prompt) -> GenerateResponse:
 
     model = "gemini-2.5-pro-preview-03-25"
     contents = [
@@ -199,6 +206,33 @@ def generate(user_prompt, system_prompt) -> GenerateResponse:
         return GenerateResponse.model_validate(fallback)
 
 
+def generate_with_openai(user_prompt, system_prompt) -> GenerateResponse:
+    response = openai_client.chat.completions.create(
+        model=os.environ.get("OPENAI_MODEL", "gpt-4o"),
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        response_format={"type": "json_object"},
+    )
+
+    try:
+        json_response = response.choices[0].message.content
+        return GenerateResponse.model_validate(json.loads(json_response))
+    except Exception as e:
+        print(f"Error processing response: {e}")
+        fallback = {
+            "current_state": {
+                "page_summary": "Error processing LLM response.",
+                "evaluation_previous_goal": "Unknown",
+                "next_goal": "Please try again",
+            },
+            "actions": [],
+            "is_done": False,
+        }
+        return GenerateResponse.model_validate(fallback)
+
+
 # generate()
 # client = OpenAI(
 #     base_url="https://openrouter.ai/api/v1",
@@ -263,3 +297,12 @@ def generate_with_open_router(user_prompt, system_prompt) -> GenerateResponse:
             "is_done": False
         }
         return GenerateResponse.model_validate(fallback)
+
+
+def generate(user_prompt, system_prompt) -> GenerateResponse:
+    if LLM_PROVIDER == "openai":
+        return generate_with_openai(user_prompt, system_prompt)
+    elif LLM_PROVIDER == "openrouter":
+        return generate_with_open_router(user_prompt, system_prompt)
+    else:
+        return generate_with_gemini(user_prompt, system_prompt)

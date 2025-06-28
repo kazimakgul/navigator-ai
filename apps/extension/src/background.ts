@@ -107,7 +107,12 @@ chrome.action.onClicked.addListener((tab) => {
                     files: ['content.js']
                 })
                     .then(() => {
-                        chrome.tabs.sendMessage(tab.id!, { type: 'toggleSidebar' });
+                        console.log('Content script injected, retrying toggleSidebar');
+                        setTimeout(() => {
+                            chrome.tabs.sendMessage(tab.id!, { type: 'toggleSidebar' })
+                                .then(() => console.log('toggleSidebar retry succeeded'))
+                                .catch(err2 => console.error('Retry toggleSidebar failed:', err2));
+                        }, 100); // wait for injected script to load
                     })
                     .catch(injectErr => {
                         console.error('Failed to inject content script:', injectErr);

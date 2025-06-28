@@ -1,20 +1,20 @@
 {
   "manifest_version": 3,
-  "name": "Navigator AI",
-  "version": "1.0.0",
-  "description": "AI-powered website navigation and automation",
+  "name": "BrowserX",
+  "version": "0.5.0",
+  "description": "BrowserX by SapienX : A browser built for agents not humans",
   "action": {
-    "default_title": "Navigator AI",
+    "default_title": "BrowserX",
     "default_icon": {
-      "16": "icons/icon16.svg",
-      "48": "icons/icon48.svg",
-      "128": "icons/icon128.svg"
+      "16": "icons/logo.png",
+      "48": "icons/logo.png",
+      "128": "icons/logo.png"
     }
   },
   "icons": {
-    "16": "icons/icon16.svg",
-    "48": "icons/icon48.svg",
-    "128": "icons/icon128.svg"
+    "16": "icons/logo.png",
+    "48": "icons/logo.png",
+    "128": "icons/logo.png"
   },
   "background": {
     "service_worker": "background.js",
@@ -38,7 +38,7 @@
   ],
   "side_panel": {
     "default_path": "popup.html",
-    "default_title": "Navigator AI",
+    "default_title": "BrowserX",
     "enable_controls": true
   }
 }
